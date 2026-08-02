@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles user deletion and undo soft delete operations
+ * Handles record deletion and undo soft delete operations
  *
  * Usage:
  * - Soft delete (default): POST with id, csrf_token, and delete_type=soft
@@ -8,23 +8,27 @@
  * - Undo soft delete: POST with id, csrf_token, and delete_type=undo
  *
  * Parameters:
- * - id (int): User ID to delete/undo
+ * - id (int): Record ID to delete/undo
  * - csrf_token (string): CSRF token for security
  * - delete_type (string): 'soft', 'hard', or 'undo'
  *
  * Process:
  * 1. Validate request method (POST only)
  * 2. Validate CSRF token
- * 3. Validate and sanitize user ID
+ * 3. Validate and sanitize record ID
  * 4. Determine operation type (soft delete, hard delete, or undo)
  * 5. Execute appropriate operation
- * 6. Set flash message and redirect to users list
+ * 6. Set flash message and redirect to record list
  */
+
+// Configurations
+$module_name = 'users';
+$table_name = 'users';
 
 // Initialize errors and messages
 $errors = [];
 $success = false;
-$redirectUrl = 'index.php?page=users';
+$redirectUrl = 'index.php?page=' . $module_name;
 
 // Only handle POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -38,10 +42,10 @@ if (empty($csrfToken) || $csrfToken !== ($_SESSION['csrf_token'] ?? '')) {
     $errors[] = 'Invalid CSRF token';
 }
 
-// Get and validate user ID
-$userId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-if (!$userId || $userId <= 0) {
-    $errors[] = 'Invalid user ID';
+// Get and validate Record ID
+$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if (!$id || $id <= 0) {
+    $errors[] = 'Invalid Record ID';
 }
 
 // Determine delete type (soft by default)
@@ -53,41 +57,41 @@ if (!in_array($deleteType, ['soft', 'hard', 'undo'])) {
 // If no errors, proceed to execute operation
 if (empty($errors)) {
     try {
-        // Check if user exists
-        $checkStmt = $pdo->prepare("SELECT id, isDeleted FROM users WHERE id = ?");
-        $checkStmt->execute([$userId]);
-        $user = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        // Check if record exists
+        $checkStmt = $pdo->prepare("SELECT id, isDeleted FROM " . $table_name . " WHERE id = ?");
+        $checkStmt->execute([$id]);
+        $record = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$user) {
-            $errors[] = 'User not found';
+        if (!$record) {
+            $errors[] = 'Record';
         } else {
             if ($deleteType === 'soft') {
-                if ($user['isDeleted']) {
-                    $errors[] = 'User is already soft deleted';
+                if ($record['isDeleted']) {
+                    $errors[] = 'Record is already soft deleted';
                 } else {
                     // Soft delete: set isDeleted to 1
-                    $stmt = $pdo->prepare("UPDATE users SET isDeleted = 1 WHERE id = ?");
-                    $stmt->execute([$userId]);
+                    $stmt = $pdo->prepare("UPDATE " . $table_name . " SET isDeleted = 1 WHERE id = ?");
+                    $stmt->execute([$id]);
                     if ($stmt->rowCount() > 0) {
                         $success = true;
                     }
                 }
             } elseif ($deleteType === 'hard') {
                 // Hard delete: remove from database
-                $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-                $stmt->execute([$userId]);
+                $stmt = $pdo->prepare("DELETE FROM " . $table_name . " WHERE id = ?");
+                $stmt->execute([$id]);
                 if ($stmt->rowCount() > 0) {
                     $success = true;
                 } else {
-                    $errors[] = 'Failed to delete user';
+                    $errors[] = 'Failed to delete record';
                 }
             } elseif ($deleteType === 'undo') {
-                if (!$user['isDeleted']) {
-                    $errors[] = 'User is not soft deleted';
+                if (!$record['isDeleted']) {
+                    $errors[] = 'Record is not soft deleted';
                 } else {
                     // Undo soft delete: set isDeleted back to 0
-                    $stmt = $pdo->prepare("UPDATE users SET isDeleted = 0 WHERE id = ?");
-                    $stmt->execute([$userId]);
+                    $stmt = $pdo->prepare("UPDATE " . $table_name . " SET isDeleted = 0 WHERE id = ?");
+                    $stmt->execute([$id]);
                     if ($stmt->rowCount() > 0) {
                         $success = true;
                     }
@@ -102,9 +106,9 @@ if (empty($errors)) {
 // Set flash messages and redirect
 if ($success) {
     $messages = [
-        'soft' => 'User soft deleted successfully',
-        'hard' => 'User hard deleted successfully',
-        'undo' => 'User restored successfully'
+        'soft' => 'Record soft deleted successfully',
+        'hard' => 'Record hard deleted successfully',
+        'undo' => 'Record restored successfully'
     ];
     $_SESSION['flash_message'] = [
         'type' => 'success',
