@@ -63,7 +63,7 @@ if (empty($errors)) {
         $record = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$record) {
-            $errors[] = 'Record';
+            $errors[] = 'Record not found';
         } else {
             if ($deleteType === 'soft') {
                 if ($record['isDeleted']) {
