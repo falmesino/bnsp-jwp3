@@ -1,10 +1,14 @@
 <?php
 /**
  * Handles user sign-out process
- *
+ * 
+ * Usage:
+ * - Access via index.php?page=sign-out
+ * - Should be accessed via GET request (link click)
+ * 
  * Process:
- * 1. Initialize session (via database.php include)
- * 2. Unset all session variables
+ * 1. Unset all session variables
+ * 2. Delete the session cookie if it exists
  * 3. Destroy the session
  * 4. Redirect to sign-in page
  */
@@ -26,5 +30,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Redirect to sign-in page
-header('Location: sign-in.php');
+header('Location: index.php?page=sign-in');
 exit;

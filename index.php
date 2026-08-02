@@ -1,5 +1,28 @@
 <?php
+  // Start output buffering to prevent "headers already sent" errors
+  // This allows us to use header() and setcookie() even after output has been "written"
+  ob_start();
+
   require_once('./includes/config/main.php');
+
+  /**
+   * Checks if the current user is authenticated
+   * 
+   * @return bool True if user is logged in, false otherwise
+   */
+  function isAuthenticated(): bool {
+      return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+  }
+
+  // Define public pages that don't require authentication
+  $publicPages = ['sign-in', 'sign-out'];
+  $currentPage = $_GET['page'] ?? 'dashboard';
+
+  // Check if authentication is required
+  if (!in_array($currentPage, $publicPages) && !isAuthenticated()) {
+      header('Location: index.php?page=sign-in');
+      exit;
+  }
 
   // Get flash message and clear it
   $flashMessage = $_SESSION['flash_message'] ?? null;
@@ -51,55 +74,75 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a
-                class="nav-link active"
-                aria-current="page"
-                href="index.php?page=dashboard"
-              >
-                Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="index.php?page=medical-records">
-                Medical Records
-              </a>
-            </li>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Billing
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="index.php?page=bills">Bills</a></li>
-                <li><a class="dropdown-item" href="index.php?page=payments">Payments</a></li>
-              </ul>
-            </li>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Master Data
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="index.php?page=users">Users</a></li>
-                <li><a class="dropdown-item" href="index.php?page=patients">Patients</a></li>
-                <li><a class="dropdown-item" href="index.php?page=medications">Medications</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-          </ul>
+          <?php if (isAuthenticated()): ?>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a
+                  class="nav-link active"
+                  aria-current="page"
+                  href="index.php?page=dashboard"
+                >
+                  Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="index.php?page=medical-records">
+                  Medical Records
+                </a>
+              </li>
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Billing
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="index.php?page=bills">Bills</a></li>
+                  <li><a class="dropdown-item" href="index.php?page=payments">Payments</a></li>
+                </ul>
+              </li>
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Master Data
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="index.php?page=users">Users</a></li>
+                  <li><a class="dropdown-item" href="index.php?page=patients">Patients</a></li>
+                  <li><a class="dropdown-item" href="index.php?page=medications">Medications</a></li>
+                </ul>
+              </li>
+            </ul>
+            
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i class="ri-user-line"></i> 
+                  <?php echo htmlspecialchars($_SESSION['user_name'] ?? $_SESSION['username']); ?>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item text-muted" href="#">Role: <?php echo htmlspecialchars(ucfirst($_SESSION['user_role'] ?? 'user')); ?></a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="index.php?page=sign-out"><i class="ri-logout-box-line"></i> Sign Out</a></li>
+                </ul>
+              </li>
+            </ul>
+          <?php endif; ?>
         </div>
       </div>
     </nav>
@@ -128,19 +171,12 @@
         $filePath = './includes/pages' . '/' . $page . '.php';
         $dirPath = './includes/pages' . '/' . $page . '/index.php';
 
-        /*
-        echo $filePath;
-        echo '<br />';
-        echo $dirPath;
-        echo '<br />';
-        */
-
         if (file_exists($filePath)) {
             include_once($filePath);
         } elseif (file_exists($dirPath)) {
             include_once($dirPath);
         } else {
-            echo 'Page not found';
+            echo '<div class="container mt-5"><div class="alert alert-warning" role="alert">Page not found</div></div>';
         }
       ?>
     </div>
@@ -152,3 +188,8 @@
     ></script>
   </body>
 </html>
+
+<?php
+  // Flush the output buffer and send all accumulated output to the browser
+  ob_end_flush();
+?>
