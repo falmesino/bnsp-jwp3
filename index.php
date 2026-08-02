@@ -110,8 +110,8 @@
           $page = preg_replace('/\.\.(?:\/|\\\)/', '', $page);
         }
 
-        $filePath = PAGES_DIR . '/' . $page . '.php';
-        $dirPath = PAGES_DIR . '/' . $page . '/index.php';
+        $filePath = './includes/pages' . '/' . $page . '.php';
+        $dirPath = './includes/pages' . '/' . $page . '/index.php';
 
         /*
         echo $filePath;
