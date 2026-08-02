@@ -7,6 +7,14 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Constants
 define('PROJECT_ROOT', dirname(__DIR__));
+define('CSS_DIR', PROJECT_ROOT . '/css');
+define('DOCS_DIR', PROJECT_ROOT . '/docs');
+define('INCLUDES_DIR', PROJECT_ROOT . '/includes');
+define('CONFIG_DIR', INCLUDES_DIR . '/config');
+define('FUNCTIONS_DIR', INCLUDES_DIR . '/functions');
+define('COMPONENTS_DIR', INCLUDES_DIR . '/components');
+define('LAYOUT_DIR', INCLUDES_DIR . '/layout');
+define('PAGES_DIR', PROJECT_ROOT . '/pages');
 
 // Load value from .env file
 if (file_exists(PROJECT_ROOT . '/.env')) {
@@ -22,7 +30,7 @@ if (file_exists(PROJECT_ROOT . '/.env')) {
 $host    = getenv('DB_HOST') ?: 'localhost';
 $dbname  = getenv('DB_NAME') ?: 'bnsp_jwp3';
 $user    = getenv('DB_USER') ?: 'root';
-$pass    = getenv('DB_PASS') ?: 'password';
+$pass    = getenv('DB_PASS') ?: 'tahusumedang';
 
 try {
     // Create PDO connection
