@@ -1,5 +1,11 @@
 <?php
   require_once('./includes/config/main.php');
+
+  // Get flash message and clear it
+  $flashMessage = $_SESSION['flash_message'] ?? null;
+  if ($flashMessage) {
+      unset($_SESSION['flash_message']);
+  }
 ?>
 
 <!DOCTYPE html>
@@ -98,7 +104,16 @@
       </div>
     </nav>
 
-    <div class="">
+    <div class="container-fluid pb-5">
+      <?php if ($flashMessage): ?>
+        <div class="container mt-4">
+          <div class="alert alert-<?php echo htmlspecialchars($flashMessage['type']); ?> alert-dismissible fade show" role="alert">
+            <?php echo htmlspecialchars($flashMessage['text']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        </div>
+      <?php endif; ?>
+
       <?php
         $page = 'index';
 
