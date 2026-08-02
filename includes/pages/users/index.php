@@ -16,6 +16,7 @@ try {
 } catch (PDOException $e) {
     $error = 'Failed to fetch users: ' . $e->getMessage();
 }
+
 ?>
 
 <div class="container mt-4">

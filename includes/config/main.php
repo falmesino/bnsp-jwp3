@@ -14,7 +14,7 @@ define('CONFIG_DIR', INCLUDES_DIR . '/config');
 define('FUNCTIONS_DIR', INCLUDES_DIR . '/functions');
 define('COMPONENTS_DIR', INCLUDES_DIR . '/components');
 define('LAYOUT_DIR', INCLUDES_DIR . '/layout');
-define('PAGES_DIR', PROJECT_ROOT . '/pages');
+define('PAGES_DIR', INCLUDES_DIR . '/pages');
 
 // Load value from .env file
 if (file_exists(PROJECT_ROOT . '/.env')) {
